@@ -8,10 +8,10 @@ use crate::{
     trap::context::{restore, TrapContext},
 };
 
-const USER_STACK_SIZE: usize = 4096 * 200; //8kB
+const USER_STACK_SIZE: usize = 4096 * 2; //8kB
 const KERNEL_STACK_SIZE: usize = 4096 * 2; //8kB
 const APP_BASE_ADDRESS: usize = 0x80400000;
-const APP_SIZE_LIMIT: usize = 0x200000;
+const APP_SIZE_LIMIT: usize = 0x20000;
 
 #[repr(align(4096))]
 struct KernelStack {
