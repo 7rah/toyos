@@ -9,7 +9,9 @@ edition = "2021"
 riscv = "0.7.0"
 wasmi = {version = "0.11.0",default-features = false}
 buddy_system_allocator = "*"
+linked_list_allocator = "*"
 
 [profile.release]
 lto = "fat"
 codegen-units = 1
+panic = "abort"

@@ -3,22 +3,33 @@
 #![feature(alloc_error_handler)]
 
 extern crate alloc;
-use user_lib::syscall::sys_write;
+use user_lib::syscall::{sys_write, sys_exit};
 use wasmi::{
-    HostError, ImportResolver, ImportsBuilder, MemoryRef, ModuleInstance, NopExternals,
+    ImportsBuilder, MemoryRef, ModuleInstance,
     RuntimeValue, Trap,
 };
 
+#[no_mangle]
+pub extern fn fmod(a: f64, b: f64) -> f64{
+    a % b
+}
 
-use buddy_system_allocator::LockedHeap;
+#[no_mangle]
+pub extern fn fmodf(a: f32, b: f32) -> f32{
+    a % b
+}
+
+
+
+use linked_list_allocator::LockedHeap;
 #[global_allocator]
-static HEAP_ALLOCATOR: LockedHeap<32> = LockedHeap::empty();
-const HEAP_SIZE: usize = 4096 * 4096;
+static ALLOCATOR: LockedHeap = LockedHeap::empty();
+const HEAP_SIZE: usize = 1024 * 1024 * 16;
 static mut HEAP_SPACE: [u8; HEAP_SIZE] = [0; HEAP_SIZE];
 
 pub fn init_heap() {
     unsafe {
-        HEAP_ALLOCATOR
+        ALLOCATOR
             .lock()
             .init(HEAP_SPACE.as_ptr() as usize, HEAP_SIZE);
     }
@@ -72,16 +83,16 @@ impl Externals for HostExternals {
             }
 
             FD_WRITE_INDEX => {
-                let fd: i32 = args.nth_checked(0)?;
+                let _fd: i32 = args.nth_checked(0)?;
                 let iovs: i32 = args.nth_checked(1)?;
-                let iovs_len: i32 = args.nth_checked(2)?;
+                let _iovs_len: i32 = args.nth_checked(2)?;
 
                 let nwritten: i32 = args.nth_checked(3)?;
                 //println!("{fd} {iovs} {iovs_len} {nwritten}");
 
                 let memory = self.memory.as_ref().unwrap();
 
-                let written = memory.with_direct_access_mut(|buf| {
+                let _written = memory.with_direct_access_mut(|buf| {
                     let base = iovs as usize;
                     let nwritten = nwritten as usize;
                     let ptr = u32::from_le_bytes(buf[base..4 + base].try_into().unwrap()) as usize;
@@ -156,9 +167,6 @@ impl ModuleImportResolver for HostExternals {
 #[no_mangle]
 fn main() -> i32 {
     init_heap();
-    use alloc::vec;
-    let v = vec![1,2,3];
-    println!("{:?}",v);
     run();
     0
 }
@@ -166,7 +174,7 @@ fn main() -> i32 {
 
 fn run() {
     let module = {
-        let wasm_buf = include_bytes!("../../ipdb.wasm");
+        let wasm_buf = include_bytes!("../../hello.wasm");
         wasmi::Module::from_buffer(&wasm_buf).unwrap()
     };
 
@@ -189,7 +197,6 @@ fn run() {
     ext.memory = Some(memory);
 
     
-    let i = instance
+    let _i = instance
         .invoke_export("_start", &[], &mut ext);
-    
 }
