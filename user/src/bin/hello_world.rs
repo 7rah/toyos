@@ -8,6 +8,6 @@ extern crate user_lib;
 fn main() -> i32 {
     let i: i32 = (0..111111).sum();
     println!("Hello, world! {}", i);
-    
+
     0
 }

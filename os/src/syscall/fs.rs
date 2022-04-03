@@ -1,8 +1,7 @@
 //! File and filesystem-related syscalls
 
-use crate::sbi::console_putchar;
-
 use super::check_buf;
+use crate::sbi::console_putchar;
 
 const FD_STDOUT: usize = 1;
 

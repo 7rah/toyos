@@ -1,9 +1,10 @@
-use core::{arch::asm, ptr};
+use core::arch::asm;
+
 use owo_colors::OwoColorize;
 
 pub unsafe fn print_stack_trace(mut fp: *const usize) {
     println!("{}", "== Begin stack trace ==".green());
-    while fp != ptr::null() {
+    while !fp.is_null() {
         let saved_ra = *fp.sub(1);
         let saved_fp = *fp.sub(2);
 

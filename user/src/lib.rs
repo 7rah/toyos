@@ -8,7 +8,6 @@ pub mod lang;
 pub mod syscall;
 
 pub use console::*;
-
 use syscall::*;
 
 pub fn write(fd: usize, buf: &[u8]) -> isize {

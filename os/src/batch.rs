@@ -1,11 +1,12 @@
 use core::{arch::asm, ops::Range};
 
+use log::info;
+
 use crate::{
     link_app::{APP_BIN, APP_NAME},
     sync::UPSafeCell,
     trap::context::{restore, TrapContext},
 };
-use log::info;
 
 const USER_STACK_SIZE: usize = 4096 * 2; //8kB
 const KERNEL_STACK_SIZE: usize = 4096 * 2; //8kB

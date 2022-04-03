@@ -17,8 +17,8 @@ pub mod sbi;
 pub mod stack_trace;
 pub mod sync;
 pub mod syscall;
-pub mod trap;
 pub mod timer;
+pub mod trap;
 
 global_asm!(
     "

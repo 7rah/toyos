@@ -1,12 +1,13 @@
 //! The panic handler
 
+use core::panic::PanicInfo;
+
 use owo_colors::OwoColorize;
 
 use crate::{
     sbi::shutdown,
     stack_trace::{get_fp, print_stack_trace},
 };
-use core::panic::PanicInfo;
 
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {

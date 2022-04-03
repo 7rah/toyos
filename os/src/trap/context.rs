@@ -302,13 +302,13 @@ pub fn trap_handler(cx: &mut TrapContext) {
 
         Trap::Exception(Exception::StoreFault) | Trap::Exception(Exception::StorePageFault) => {
             info!("PageFault in application, kernel killed it.");
-            info!("sepc = {:#x}",cx.sepc);
+            info!("sepc = {:#x}", cx.sepc);
             unsafe { print_stack_trace(cx.x8 as *const usize) }
             run_next_app();
         }
         Trap::Exception(Exception::IllegalInstruction) => {
             info!("IllegalInstruction in application, kernel killed it.");
-            info!("sepc = {:#x}",cx.sepc);
+            info!("sepc = {:#x}", cx.sepc);
             unsafe { print_stack_trace(cx.x8 as *const usize) }
             run_next_app();
         }

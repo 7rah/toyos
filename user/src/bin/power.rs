@@ -23,6 +23,6 @@ fn main() -> i32 {
         }
     }
     println!("Test power OK!");
-    
+
     0
 }

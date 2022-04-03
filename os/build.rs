@@ -46,11 +46,7 @@ fn insert_app_data() -> Result<()> {
     }
     writeln!(f, "];").unwrap();
 
-    writeln!(
-        f,
-        "pub static APP_NAME: &[&str] = &{apps:?};"
-    )
-    .unwrap();
+    writeln!(f, "pub static APP_NAME: &[&str] = &{apps:?};").unwrap();
 
     Ok(())
 }

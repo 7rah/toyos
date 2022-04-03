@@ -1,10 +1,12 @@
 use core::arch::asm;
+
 use log::{Level, Metadata, Record};
 struct SimpleLogger;
 use log::{LevelFilter, SetLoggerError};
-use owo_colors::AnsiColors::{Blue, Cyan, Green, Red, Yellow};
-
-use owo_colors::OwoColorize;
+use owo_colors::{
+    AnsiColors::{Blue, Cyan, Green, Red, Yellow},
+    OwoColorize,
+};
 
 use crate::timer::timer_now;
 

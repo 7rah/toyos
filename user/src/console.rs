@@ -1,5 +1,6 @@
-use super::write;
 use core::fmt::{self, Write};
+
+use super::write;
 
 struct Stdout;
 
