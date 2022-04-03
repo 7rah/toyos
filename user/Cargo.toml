@@ -7,8 +7,6 @@ edition = "2021"
 
 [dependencies]
 riscv = "0.7.0"
-wasmi = {version = "0.11.0",default-features = false}
-buddy_system_allocator = "*"
 
 [profile.release]
 lto = "fat"
