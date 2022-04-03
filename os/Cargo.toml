@@ -1,0 +1,17 @@
+[package]
+name = "toyos"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+owo-colors = "3"
+log = "0.4"
+lazy_static = { version = "1.4", features = ["spin_no_std"] }
+spin = "0.9"
+riscv = { git = "https://github.com/rcore-os/riscv", features = ["inline-asm"] } 
+repr_offset = { version = "0.2", features = ["derive"] }
+
+[profile.release]
+lto = "fat"

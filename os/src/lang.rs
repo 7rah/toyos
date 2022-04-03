@@ -2,7 +2,10 @@
 
 use owo_colors::OwoColorize;
 
-use crate::sbi::shutdown;
+use crate::{
+    sbi::shutdown,
+    stack_trace::{get_fp, print_stack_trace},
+};
 use core::panic::PanicInfo;
 
 #[panic_handler]
@@ -10,17 +13,17 @@ fn panic(info: &PanicInfo) -> ! {
     if let Some(location) = info.location() {
         println!(
             "{} Panicked at {}:{} {}",
-            "[kernel]".yellow(),
+            "[K]".green(),
             location.file(),
             location.line(),
             info.message().unwrap()
         );
     } else {
-        println!(
-            "{} Panicked: {}",
-            "[kernel]".yellow(),
-            info.message().unwrap()
-        );
+        println!("{} Panicked: {}", "[K]".green(), info.message().unwrap());
+    }
+
+    unsafe {
+        print_stack_trace(get_fp());
     }
     shutdown()
 }

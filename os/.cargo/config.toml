@@ -1,8 +1,10 @@
 [target.riscv64gc-unknown-none-elf]
 rustflags = ["-C", "link-arg=-Tmisc/linker64.ld", "-Cforce-frame-pointers=yes"]
-runner = "misc/runner.sh"
+runner = "cargo make -l error qemu"
 #runner = "qemu-system-riscv64 -machine virt -bios misc/rustsbi-qemu-no-log.bin -nographic -kernel"
 
 [build]
 target = "riscv64gc-unknown-none-elf"
 
+[alias]
+dev = "watch -c -q -i src/link_app.rs -- cargo run --release"

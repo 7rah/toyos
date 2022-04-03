@@ -1,0 +1,47 @@
+[tasks.build]
+command = "cargo"
+args = ["build","--release"]
+
+[tasks.strip-all]
+dependencies = ["build"]
+script_runner = "@duckscript"
+script = '''
+output = exec ls src/bin
+targets = replace ${output.stdout} ".rs" ""
+targets = split ${targets} "\n"
+array_pop ${targets} # free blank
+
+cd ./target/riscv64gc-unknown-none-elf/release
+for path in ${targets}
+    #echo ${path} 
+    spawn rust-objcopy --strip-all ${path} -O binary ${path}.bin
+end
+
+sleep 100
+'''
+
+
+[tasks.qemu]
+dependencies = ["strip-all"]
+script_runner = "@duckscript"
+script = '''
+output = exec ls src/bin
+targets = replace ${output.stdout} ".rs" ""
+targets = split ${targets} "\n"
+array_pop ${targets} # free blank
+
+cd ./target/riscv64gc-unknown-none-elf/release
+for path in ${targets}
+    echo "exec" ${path} 
+    exec qemu-riscv64 ${path}
+    echo 
+end
+'''
+
+[tasks.run]
+dependencies = ["strip-all"]
+script_runner = "@duckscript"
+script = '''
+cd ../os
+exec cargo dev
+'''

@@ -1,0 +1,20 @@
+[tasks.qemu]
+dependencies = ["strip-all"]
+script_runner = "@duckscript"
+script = '''
+exec qemu-system-riscv64 -machine virt -bios misc/rustsbi-qemu-no-log.bin -nographic -device loader,file=${1},addr=0x80200000 
+'''
+
+[tasks.debug]
+dependencies = ["strip-all"]
+script_runner = "@duckscript"
+script = '''
+exec qemu-system-riscv64 -machine virt -bios misc/rustsbi-qemu-no-log.bin -nographic -device loader,file=${1},addr=0x80200000 -s -S 
+'''
+
+
+[tasks.strip-all]
+script_runner = "@duckscript"
+script = '''
+exec rust-objcopy --strip-all ${1} -O binary ${1}.bin
+'''
