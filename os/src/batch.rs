@@ -8,7 +8,7 @@ use crate::{
     trap::context::{restore, TrapContext},
 };
 
-const USER_STACK_SIZE: usize = 1024 * 1024 * 16; //16MB  For using wasm_hello app
+const USER_STACK_SIZE: usize = 4096 * 2; //1024 * 1024 * 16; //16MB  For using wasm_hello app
 const KERNEL_STACK_SIZE: usize = 4096 * 2; //8kB
 const APP_BASE_ADDRESS: usize = 0x80400000;
 const APP_SIZE_LIMIT: usize = 0x200000;
@@ -61,19 +61,6 @@ pub struct AppManager {
 
 lazy_static::lazy_static! {
     pub static ref APP_MANAGER: UPSafeCell<AppManager> = unsafe {UPSafeCell::new({
-        /*unsafe {
-            extern "C" { fn _num_app(); }
-            let num_app_ptr = _num_app as *const usize;
-            let num_app = num_app_ptr.read_volatile();
-
-            let mut app_start = [0usize; MAX_APP_NUM + 1];
-            let app_start_raw = core::slice::from_raw_parts(num_app_ptr.add(1),num_app+1);
-
-            app_start[0..num_app+1].copy_from_slice(app_start_raw);
-
-
-            AppManager { num_app,next_app:0,app_start,current_app:0}
-        }*/
         let app_bin = APP_BIN;
         let app_name = APP_NAME;
         AppManager { num_app:app_bin.len(),next_app:0,app_bin,current_app:0,app_name}
@@ -81,10 +68,10 @@ lazy_static::lazy_static! {
 }
 
 impl AppManager {
-    pub fn get_current_app_data_section_range(&self) -> Range<usize> {
+    pub fn get_current_app_data_section_range(&self) -> Range<*const u8> {
         let app_id = self.current_app;
         let len = self.app_bin[app_id].len();
-        APP_BASE_ADDRESS..APP_BASE_ADDRESS + len
+        (APP_BASE_ADDRESS as *const u8)..((APP_BASE_ADDRESS + len) as *const u8)
     }
 
     unsafe fn load_app(&self, app_id: usize) {
@@ -100,6 +87,9 @@ impl AppManager {
         //copy app data section
         core::slice::from_raw_parts_mut(APP_BASE_ADDRESS as *mut u8, APP_SIZE_LIMIT).fill(0);
         let app_src = self.app_bin[app_id];
+        if app_src.len() > APP_SIZE_LIMIT {
+            panic!("current app_{app_id} {app_name} size is bigger than APP_SIZE_LIMIT {APP_SIZE_LIMIT:#x}");
+        }
         let app_dst = core::slice::from_raw_parts_mut(APP_BASE_ADDRESS as *mut u8, app_src.len());
         app_dst.copy_from_slice(app_src);
     }

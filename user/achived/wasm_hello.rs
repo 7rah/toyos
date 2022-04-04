@@ -101,9 +101,8 @@ impl Externals for HostExternals {
                     buf.copy_within(4 + base..8 + base, nwritten);
                     let tmp = &buf[ptr..ptr + len as usize];
 
-                    let len = sys_write(1,tmp);
+                    sys_write(1,tmp);
                     //println!("{nwritten}");
-                    return len;
                 });
 
                 Ok(Some(RuntimeValue::I32(0)))

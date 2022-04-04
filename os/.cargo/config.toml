@@ -8,3 +8,4 @@ target = "riscv64gc-unknown-none-elf"
 
 [alias]
 dev = "watch -c -q -i src/link_app.rs -- cargo run --release"
+debug = "watch -c -q -i src/link_app.rs -- cargo make debug"

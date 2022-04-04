@@ -15,3 +15,5 @@ repr_offset = { version = "0.2", features = ["derive"] }
 
 [profile.release]
 lto = "fat"
+panic = "abort"
+codegen-units = 1
