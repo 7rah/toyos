@@ -1,6 +1,35 @@
 [tasks.build]
-command = "cargo"
-args = ["build","--release"]
+script_runner = "@duckscript"
+script = '''
+output = exec ls src/bin
+targets = replace ${output.stdout} ".rs" ""
+targets = split ${targets} "\n"
+array_pop ${targets} # free blank
+
+i = calc 0
+APP_SIZE_LIMIT = hex_decode "0x200000"
+BASE_ADDRESS_STR = set "0x80400000"
+BASE_ADDRESS = hex_decode ${BASE_ADDRESS_STR}
+
+for app in ${targets}
+    # calc base_address
+    base_address = calc ${i} * ${APP_SIZE_LIMIT} + ${BASE_ADDRESS} 
+    base_address = hex_encode ${base_address}
+
+    # save linker.ld
+    raw = readfile linker.ld
+    
+    # modify BASE_ADDRESS in linker.ld
+    modified = replace ${raw} ${BASE_ADDRESS_STR} ${base_address}
+    writefile linker.ld ${modified}
+    
+    exec cargo build --release --bin ${app}
+
+    # restore and move to next app
+    writefile linker.ld ${raw}
+    i = calc ${i} + 1
+end
+'''
 
 [tasks.strip-all]
 dependencies = ["build"]
@@ -45,3 +74,7 @@ script = '''
 cd ../os
 exec cargo dev
 '''
+
+[config]
+skip_core_tasks = true
+
