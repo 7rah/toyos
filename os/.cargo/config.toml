@@ -7,5 +7,5 @@ runner = "cargo make -l error qemu"
 target = "riscv64gc-unknown-none-elf"
 
 [alias]
-dev = "watch -c -q -i src/link_app.rs -- cargo run --release"
+dev = "watch -c -q -i src/link_app.rs -- cargo run --release --features check-only"
 debug = "watch -c -q -i src/link_app.rs -- cargo make debug"
