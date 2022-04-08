@@ -101,7 +101,7 @@ pub unsafe extern "C" fn restore(cx: &TrapContext) {
             ld x1, {off_x1}(sp)
             ld x3, {off_x3}(sp)",
             #(
-                concat!("ld x",N,", {off_x",N,"}(sp)"), //equal to sd x5~31, {off_x5~31}(sp)
+                concat!("ld x",N,", {off_x",N,"}(sp)"), //equal to ld x5~31, {off_x5~31}(sp)
             )*
             "
             # release TrapContext on kernel stack
