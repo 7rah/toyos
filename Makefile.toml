@@ -1,0 +1,36 @@
+[config]
+skip_core_tasks = true
+
+[tasks.build]
+script_runner = "@duckscript"
+script = '''
+cd user
+exec cargo make build --release
+cd ../os
+exec cargo make build --release
+'''
+
+[tasks.qemu]
+script_runner = "@duckscript"
+script = '''
+cd os
+exec cargo dev-user
+'''
+
+[tasks.clean]
+script_runner = "@duckscript"
+script = '''
+cd user 
+exec cargo clean
+cd ../os
+exec cargo clean
+'''
+
+[tasks.default]
+script_runner = "@duckscript"
+script = '''
+echo "
+a
+v
+"
+'''
