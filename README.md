@@ -3,7 +3,12 @@
 ### Rust
 
 ```shell
-# 首先确保你已经安装了 rust toolchain. https://www.rust-lang.org/tools/install
+# 无论选择哪种安装方式，请先安装好 Rust toolchain
+# 自动安装
+cargo install cargo-make
+makers install-dependencies
+
+# 手动安装
 rustup toolchain add nightly
 rustup component add llvm-tools-preview
 rustup target add riscv64gc-unknown-none-elf
