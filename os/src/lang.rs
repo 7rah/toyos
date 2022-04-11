@@ -15,8 +15,8 @@ fn panic(info: &PanicInfo) -> ! {
         println!(
             "{} Panicked at {}:{} {}",
             "[K]".green(),
-            location.file(),
-            location.line(),
+            location.file().cyan(),
+            location.line().cyan(),
             info.message().unwrap()
         );
     } else {

@@ -1,22 +1,22 @@
 //! App management syscalls
 use super::check_buf;
-use crate::batch::{run_next_app, APP_MANAGER};
+use crate::task::{exit_current_and_run_next, TASK_MANAGER};
 
 /// task exits and submit an exit code
 pub fn sys_exit(exit_code: i32) -> ! {
     println!("[kernel] Application exited with code {}", exit_code);
-    run_next_app()
+    exit_current_and_run_next();
+    panic!("Unreachable in sys_exit!");
 }
 
 pub fn sys_get_taskinfo(buf: *mut u8, len: usize) -> isize {
     if !check_buf(buf, len) {
         return -1;
     }
-    let app_manager = APP_MANAGER.exclusive_access();
-    let app_id = app_manager.current_app;
+    let task_id = TASK_MANAGER.get_current_task();
+    let name = TASK_MANAGER.get_current_task_name();
 
     let dst = unsafe { core::slice::from_raw_parts_mut(buf, len) };
-    let name = app_manager.app_name[app_id];
     let src = name.as_bytes();
 
     if src.len() > dst.len() {
@@ -25,5 +25,5 @@ pub fn sys_get_taskinfo(buf: *mut u8, len: usize) -> isize {
 
     dst[0..src.len()].copy_from_slice(src);
 
-    app_id as isize
+    task_id as isize
 }

@@ -9,14 +9,16 @@ use core::arch::global_asm;
 
 #[macro_use]
 pub mod console;
-pub mod batch;
+pub mod config;
 mod lang;
 pub mod link_app;
+pub mod loader;
 pub mod logging;
 pub mod sbi;
 pub mod stack_trace;
 pub mod sync;
 pub mod syscall;
+pub mod task;
 pub mod timer;
 pub mod trap;
 

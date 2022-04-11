@@ -1,0 +1,54 @@
+[config]
+skip_core_tasks = true
+
+[tasks.build]
+script_runner = "@duckscript"
+script = '''
+cd user
+exec cargo make build --release
+cd ../os
+exec cargo make build --release
+'''
+
+[tasks.qemu]
+script_runner = "@duckscript"
+script = '''
+cd os
+exec cargo dev-user
+'''
+
+[tasks.clean]
+script_runner = "@duckscript"
+script = '''
+cd user 
+exec cargo clean
+cd ../os
+exec cargo clean
+'''
+
+[tasks.clippy]
+script_runner = "@duckscript"
+script = '''
+cd user 
+exec cargo clippy --fix
+cd ../os
+exec cargo clippy --fix
+'''
+
+[tasks.fmt]
+script_runner = "@duckscript"
+script = '''
+cd user 
+exec cargo fmt
+cd ../os
+exec cargo fmt
+'''
+
+[tasks.tidy]
+dependencies = ["clippy","fmt"]
+
+[tasks.default]
+script_runner = "@duckscript"
+script = '''
+echo exec `makers qemu` to run toyos
+'''

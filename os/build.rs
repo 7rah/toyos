@@ -1,15 +1,19 @@
 use std::{
+    env,
     fs::{read_dir, File},
     io::{Result, Write},
     process::Command,
 };
 
 fn main() {
-    println!("cargo:rerun-if-changed=../user/src/");
-    println!("cargo:rerun-if-changed=misc/linker64.ld");
-    println!("cargo:rerun-if-changed={}", TARGET_PATH);
-    build_apps();
-    insert_app_data().unwrap();
+    if env::var("CARGO_FEATURE_CHECK_ONLY").is_err() {
+        println!("cargo:rerun-if-changed=build.rs");
+        println!("cargo:rerun-if-changed=../user/src/");
+        println!("cargo:rerun-if-changed=misc/linker64.ld");
+        println!("cargo:rerun-if-changed={}", TARGET_PATH);
+        build_apps();
+        insert_app_data().unwrap();
+    }
 }
 
 fn build_apps() {
@@ -47,6 +51,7 @@ fn insert_app_data() -> Result<()> {
     writeln!(f, "];").unwrap();
 
     writeln!(f, "pub static APP_NAME: &[&str] = &{apps:?};").unwrap();
+    writeln!(f, "pub const APP_NUM: usize = {};", apps.len()).unwrap();
 
     Ok(())
 }
