@@ -50,5 +50,18 @@ dependencies = ["clippy","fmt"]
 [tasks.default]
 script_runner = "@duckscript"
 script = '''
+echo exec `makers install-dependencies` to install dependencies automatically
+echo note: you still need to install QEMU manually
 echo exec `makers qemu` to run toyos
+'''
+
+[tasks.install-dependencies]
+script_runner = "@duckscript"
+script = '''
+exec rustup toolchain add nightly
+exec rustup component add llvm-tools-preview
+exec rustup target add riscv64gc-unknown-none-elf
+exec cargo install cargo-binutils
+exec cargo install cargo-make
+exec cargo install cargo-watch
 '''
