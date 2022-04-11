@@ -29,8 +29,5 @@ exec cargo clean
 [tasks.default]
 script_runner = "@duckscript"
 script = '''
-echo "
-a
-v
-"
+echo exec `makers qemu` to run toyos
 '''
