@@ -1,29 +1,22 @@
 use core::arch::asm;
 
-use log::info;
 use repr_offset::ReprOffset;
-use riscv::register::{
-    scause::{self, Exception, Trap},
-    sstatus::{self, Sstatus, SPP},
-    stval,
-};
+use riscv::register::sstatus::{self, Sstatus, SPP};
 use seq_macro::seq;
-
-use crate::{batch::run_next_app, stack_trace::print_stack_trace, syscall::syscall};
 
 seq!(N in 5..=31 {
 #[repr(C)]
 #[derive(Debug, ReprOffset)]
 #[roff(usize_offsets)]
 pub struct TrapContext {
-    x1: usize,
-    x2: usize,
-    x3: usize,
+    pub x1: usize,
+    pub x2: usize,
+    pub x3: usize,
     #(
-        x~N:usize, //x5~x31
+        pub x~N:usize, //x5~x31
     )*
-    sstatus: Sstatus,
-    sepc: usize,
+    pub sstatus: Sstatus,
+    pub sepc: usize,
 }});
 
 seq!(N in 5..=31 {
@@ -87,7 +80,7 @@ pub unsafe extern "C" fn restore(cx: &TrapContext) {
             
 
             # restoe sstatus,spec
-            mv sp, a0
+            #mv sp, a0
 
             ld t0, {off_sstatus}(sp)
             ld t1, {off_sepc}(sp)
@@ -127,6 +120,17 @@ pub unsafe extern "C" fn restore(cx: &TrapContext) {
 }
 });
 
+
+#[naked]
+#[no_mangle]
+#[repr(align(4))]
+pub unsafe extern "C" fn restore_(cx: &TrapContext) {
+    asm!("mv sp, a0
+          call restore  
+        ",options(noreturn));
+
+}
+
 impl TrapContext {
     pub fn init_app_context(entry: usize, sp: usize) -> Self {
         let mut sstatus = sstatus::read();
@@ -146,44 +150,5 @@ impl TrapContext {
         }
 
         })
-    }
-}
-
-#[no_mangle]
-pub fn trap_handler(cx: &mut TrapContext) {
-    let scause = scause::read();
-    let stval = stval::read();
-
-    //info!("{cx:?} {stval:?}");
-
-    match scause.cause() {
-        Trap::Exception(Exception::UserEnvCall) => {
-            cx.sepc += 4; //move to next
-            cx.x10 = syscall(cx.x17, [cx.x10, cx.x11, cx.x12]) as usize;
-            unsafe {
-                restore(cx);
-            }
-        }
-
-        Trap::Exception(Exception::StoreFault) | Trap::Exception(Exception::StorePageFault) => {
-            info!("PageFault in application, kernel killed it.");
-            info!("sepc = {:#x}", cx.sepc);
-            unsafe { print_stack_trace(cx.x8 as *const usize) }
-            run_next_app();
-        }
-        Trap::Exception(Exception::IllegalInstruction) => {
-            info!("IllegalInstruction in application, kernel killed it.");
-            info!("sepc = {:#x}", cx.sepc);
-            unsafe { print_stack_trace(cx.x8 as *const usize) }
-            run_next_app();
-        }
-
-        _ => {
-            panic!(
-                "Unsupported trap {:?}, stval = {:#x}!",
-                scause.cause(),
-                stval
-            );
-        }
     }
 }

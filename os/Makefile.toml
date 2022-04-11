@@ -6,13 +6,12 @@ exec qemu-system-riscv64 -machine virt -bios misc/rustsbi-qemu-no-log.bin -nogra
 '''
 
 [tasks.debug]
-dependencies = ["strip-all"]
 script_runner = "@duckscript"
 script = '''
 exec cargo build --release
-path = "target/riscv64gc-unknown-none-elf/release/toyos"
+path = set "target/riscv64gc-unknown-none-elf/release/toyos"
 exec cargo make strip-all ${path}
-exec qemu-system-riscv64 -machine virt -bios misc/rustsbi-qemu.bin -nographic -device loader,file=${path},addr=0x80200000 -s -S 
+exec qemu-system-riscv64 -machine virt -bios misc/rustsbi-qemu.bin -nographic -device loader,file=${path}.bin,addr=0x80200000 -s -S 
 '''
 
 

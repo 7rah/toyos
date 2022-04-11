@@ -51,7 +51,7 @@ fn insert_app_data() -> Result<()> {
     writeln!(f, "];").unwrap();
 
     writeln!(f, "pub static APP_NAME: &[&str] = &{apps:?};").unwrap();
-    writeln!(f, "pub static APP_NUM: usize = {};", apps.len()).unwrap();
+    writeln!(f, "pub const APP_NUM: usize = {};", apps.len()).unwrap();
 
     Ok(())
 }

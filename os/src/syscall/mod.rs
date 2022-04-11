@@ -23,7 +23,7 @@ use fs::*;
 use log::info;
 use process::*;
 
-use crate::batch::{APP_MANAGER, USER_STACK};
+use crate::task::TASK_MANAGER;
 
 /// handle syscall exception with `syscall_id` and other arguments
 pub fn syscall(syscall_id: usize, args: [usize; 3]) -> isize {
@@ -36,18 +36,19 @@ pub fn syscall(syscall_id: usize, args: [usize; 3]) -> isize {
 }
 
 fn check_buf(buf: *const u8, len: usize) -> bool {
-    let user_stack_range = USER_STACK.data.as_ptr_range();
-    let app_range = APP_MANAGER
-        .exclusive_access()
-        .get_current_app_data_section_range();
+    let user_stack_range = TASK_MANAGER
+        .get_current_task_stack()
+        .get_stack()
+        .as_ptr_range();
+    let task_range = TASK_MANAGER.get_current_task_data_section().as_ptr_range();
     let buf_range = (buf as *const u8)..((buf as usize + len) as *const u8);
 
     //debug!("{user_stack_range:?} {current_app_range:?} {buf_range:?}");
     let in_range =
         |a: &Range<*const u8>, b: &Range<*const u8>| (b.start <= a.start) & (b.end >= a.end);
 
-    if !in_range(&buf_range, &user_stack_range) & !in_range(&buf_range, &app_range) {
-        info!("App access out of bounds, excepted in user stack {user_stack_range:?} or in data section {app_range:?}, but given {buf_range:?}");
+    if !in_range(&buf_range, &user_stack_range) & !in_range(&buf_range, &task_range) {
+        info!("Task access out of bounds, excepted in user stack {user_stack_range:?} or in data section {task_range:?}, but given {buf_range:?}");
         false
     } else {
         true
