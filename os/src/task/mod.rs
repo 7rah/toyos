@@ -1,8 +1,6 @@
 mod context;
 mod task;
 
-use core::mem::MaybeUninit;
-
 pub use context::TaskContext;
 use log::debug;
 
@@ -32,7 +30,7 @@ lazy_static::lazy_static! {
 
 impl TaskManager {
     fn init() -> Self {
-        let mut tasks: [TaskControlBlock; APP_NUM] = unsafe { MaybeUninit::uninit().assume_init() };
+        let mut tasks = [TaskControlBlock::zero_init(); APP_NUM];
 
         for (app_id, task) in tasks.iter_mut().enumerate() {
             task.task_cx = TaskContext::goto_restore(init_app_cx(app_id));

@@ -44,13 +44,20 @@ fn insert_app_data() -> Result<()> {
         .collect();
     apps.sort();
 
-    write!(f, "pub static APP_BIN: &[&[u8]] = &[").unwrap();
+    writeln!(f, "pub static APP_BIN: &[&[u8]] = &[").unwrap();
     for app in &apps {
-        write!(f, "include_bytes!(\"{TARGET_PATH}{app}.bin\"),").unwrap();
+        writeln!(f, "    include_bytes!(\"{TARGET_PATH}{app}.bin\"),").unwrap();
     }
     writeln!(f, "];").unwrap();
 
-    writeln!(f, "pub static APP_NAME: &[&str] = &{apps:?};").unwrap();
+
+    writeln!(f, "pub static APP_NAME: &[&str] = &[").unwrap();
+    for name in &apps {
+        writeln!(f,"    \"{name}\",").unwrap();
+    }
+    writeln!(f, "];").unwrap();
+
+
     writeln!(f, "pub const APP_NUM: usize = {};", apps.len()).unwrap();
 
     Ok(())
