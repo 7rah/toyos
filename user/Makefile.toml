@@ -22,8 +22,8 @@ for app in ${targets}
     # modify BASE_ADDRESS in linker.ld
     modified = replace ${raw} ${BASE_ADDRESS_STR} ${base_address}
     writefile linker.ld ${modified}
-    cat linker.ld
-    echo ${app} ${base_address}
+     
+    echo ${i} ${app} at ${base_address} 
     exec cargo build --release --bin ${app}
     # restore and move to next app
     writefile linker.ld ${raw}
