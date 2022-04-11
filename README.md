@@ -32,4 +32,3 @@ Windows / Mac 用户可以参考 [QEMU 下载页面](https://www.qemu.org/downlo
 ```shell
 makers qemu
 ```
-
