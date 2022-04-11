@@ -1,15 +1,11 @@
-
-
-
-
 use core::arch::asm;
 
-use log::{info, debug};
+use log::{debug, info};
 
 use crate::{
     config::{APP_BASE_ADDRESS, APP_SIZE_LIMIT, KERNEL_STACK_SIZE, USER_STACK_SIZE},
     link_app::{APP_BIN, APP_NUM},
-    trap::context::{TrapContext},
+    trap::context::TrapContext,
 };
 
 #[repr(align(4096))]
@@ -27,7 +23,7 @@ pub struct UserStack {
 // we use customed kernel stack to avoid stack overflow
 // if we use default stack, we can't strink kernel stack
 pub static KERNEL_STACK: [KernelStack; APP_NUM] = [KernelStack {
- data: [0; KERNEL_STACK_SIZE],
+    data: [0; KERNEL_STACK_SIZE],
 }; APP_NUM];
 
 pub static USER_STACK: [UserStack; APP_NUM] = [UserStack {
@@ -70,8 +66,8 @@ pub fn load_apps() {
     for (src, dst) in srcs.iter().zip(dsts.iter_mut()) {
         dst[0..src.len()].copy_from_slice(src);
         dst[src.len()..].fill(0);
-        debug!("app {i} at {:?}",dst.as_ptr_range());
-        i+=1;
+        debug!("app {i} at {:?}", dst.as_ptr_range());
+        i += 1;
     }
 }
 

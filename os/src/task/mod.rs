@@ -4,7 +4,7 @@ mod task;
 use core::mem::MaybeUninit;
 
 pub use context::TaskContext;
-use log::{info, debug};
+use log::{debug, info};
 
 use self::{
     context::{__switch, switch},
@@ -101,7 +101,7 @@ impl TaskManager {
     pub fn run_next_task(&self) {
         let next = self.find_next_task();
         if let Some(next) = next {
-            debug!("next task: {:?} {}", next,APP_NAME[next]);
+            debug!("next task: {:?} {}", next, APP_NAME[next]);
             let mut inner = self.inner.exclusive_access();
             let current = inner.current_task;
 
@@ -113,12 +113,10 @@ impl TaskManager {
 
             drop(inner);
 
-            unsafe {switch(current_task_cx_ptr, next_task_cx_ptr)}
-
-        }else{
+            unsafe { switch(current_task_cx_ptr, next_task_cx_ptr) }
+        } else {
             panic!("All applications completed!")
         }
-        
     }
 }
 

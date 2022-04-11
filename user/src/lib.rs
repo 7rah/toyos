@@ -2,7 +2,6 @@
 #![feature(panic_info_message)]
 #![feature(linkage)]
 
-
 #[macro_use]
 pub mod console;
 pub mod lang;

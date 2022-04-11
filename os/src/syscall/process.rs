@@ -1,6 +1,6 @@
 //! App management syscalls
 use super::check_buf;
-use crate::task::{TASK_MANAGER, exit_current_and_run_next};
+use crate::task::{exit_current_and_run_next, TASK_MANAGER};
 
 /// task exits and submit an exit code
 pub fn sys_exit(exit_code: i32) -> ! {
