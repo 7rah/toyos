@@ -4,12 +4,11 @@
 
 use core::mem::size_of;
 
-use log::{debug, info, LevelFilter};
+use log::{debug, LevelFilter};
 use toyos::{
-    config::APP_BASE_ADDRESS,
     link_app::APP_NUM,
     loader::{KERNEL_STACK, USER_STACK},
-    task::{exit_current_and_run_next, run_first_task, run_next_task},
+    task::run_first_task,
     trap::context::{all_trap, restore, TrapContext},
 };
 

@@ -1,6 +1,4 @@
-use core::arch::asm;
-
-use log::{debug, info};
+use log::debug;
 
 use crate::{
     config::{APP_BASE_ADDRESS, APP_SIZE_LIMIT, KERNEL_STACK_SIZE, USER_STACK_SIZE},

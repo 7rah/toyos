@@ -4,16 +4,16 @@ mod task;
 use core::mem::MaybeUninit;
 
 pub use context::TaskContext;
-use log::{debug, info};
+use log::debug;
 
 use self::{
-    context::{__switch, switch},
+    context::switch,
     task::{TaskControlBlock, TaskStatus},
 };
 use crate::{
     config::{APP_BASE_ADDRESS, APP_SIZE_LIMIT},
     link_app::{APP_NAME, APP_NUM},
-    loader::{init_app_cx, UserStack, KERNEL_STACK, USER_STACK},
+    loader::{init_app_cx, UserStack, USER_STACK},
     sync::UPSafeCell,
 };
 
@@ -27,7 +27,7 @@ pub struct TaskManagerInner {
 }
 
 lazy_static::lazy_static! {
-    pub static ref TASK_MANAGER: TaskManager = unsafe {TaskManager::init()};
+    pub static ref TASK_MANAGER: TaskManager = TaskManager::init();
 }
 
 impl TaskManager {

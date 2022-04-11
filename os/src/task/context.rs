@@ -1,6 +1,6 @@
 use core::arch::asm;
 
-use log::{debug, info};
+use log::debug;
 use repr_offset::ReprOffset;
 use seq_macro::seq;
 
