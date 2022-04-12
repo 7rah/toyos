@@ -20,7 +20,7 @@ panic = "abort"
 #codegen-units = 1
 
 [profile.dev]
-debug = false
+opt-level = 1
 
 [features]
 check-only = []
