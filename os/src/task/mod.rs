@@ -2,7 +2,7 @@ mod context;
 mod task;
 
 pub use context::TaskContext;
-use log::debug;
+use log::info;
 
 use self::{
     context::switch,
@@ -68,6 +68,7 @@ impl TaskManager {
         let task0 = &mut inner.tasks[0];
         task0.task_status = TaskStatus::Running;
         let next_task_cx_ptr = &task0.task_cx as *const TaskContext;
+        info!("task 0: {}", APP_NAME[0]);
         drop(inner);
         let mut _unused = TaskContext::zero_init();
 
@@ -99,7 +100,7 @@ impl TaskManager {
     pub fn run_next_task(&self) {
         let next = self.find_next_task();
         if let Some(next) = next {
-            debug!("next task: {:?} {}", next, APP_NAME[next]);
+            info!("next task: {:?} {}", next, APP_NAME[next]);
             let mut inner = self.inner.exclusive_access();
             let current = inner.current_task;
 
@@ -137,5 +138,10 @@ fn mark_current_exited() {
 
 pub fn exit_current_and_run_next() {
     mark_current_exited();
+    run_next_task();
+}
+
+pub fn suspend_current_and_run_next() {
+    mark_current_suspended();
     run_next_task();
 }
