@@ -1,5 +1,4 @@
 pub static APP_BIN: &[&[u8]] = &[
-    include_bytes!("../../user/target/riscv64gc-unknown-none-elf/release/0yield.bin"),
     include_bytes!("../../user/target/riscv64gc-unknown-none-elf/release/get_taskinfo.bin"),
     include_bytes!("../../user/target/riscv64gc-unknown-none-elf/release/hello_world.bin"),
     include_bytes!("../../user/target/riscv64gc-unknown-none-elf/release/power.bin"),
@@ -9,7 +8,6 @@ pub static APP_BIN: &[&[u8]] = &[
     include_bytes!("../../user/target/riscv64gc-unknown-none-elf/release/unsafe_syswrite.bin"),
 ];
 pub static APP_NAME: &[&str] = &[
-    "0yield",
     "get_taskinfo",
     "hello_world",
     "power",
@@ -18,4 +16,4 @@ pub static APP_NAME: &[&str] = &[
     "store_fault",
     "unsafe_syswrite",
 ];
-pub const APP_NUM: usize = 8;
+pub const APP_NUM: usize = 7;
