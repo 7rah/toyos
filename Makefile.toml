@@ -30,9 +30,9 @@ exec cargo clean
 script_runner = "@duckscript"
 script = '''
 cd user 
-exec cargo clippy --fix
+exec cargo clippy --fix --allow-dirty
 cd ../os
-exec cargo clippy --fix
+exec cargo clippy --fix --allow-dirty
 '''
 
 [tasks.fmt]
