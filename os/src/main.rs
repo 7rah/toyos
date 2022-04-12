@@ -18,6 +18,9 @@ pub fn main() -> ! {
     toyos::logging::init(LevelFilter::Debug).unwrap();
     toyos::trap::init();
     toyos::loader::load_apps();
+
+    toyos::trap::enable_timer_interrupt();
+    //toyos::timer::set_next_trigger();
     debug!("restore {:?}", restore as *const u8);
     debug!("all_trap {:?}", all_trap as *const u8);
 
