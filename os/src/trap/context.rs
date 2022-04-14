@@ -52,7 +52,28 @@ pub unsafe extern "C" fn all_trap() {
 
             mv a0, sp
             call trap_handler
+            call restore # 实现兜底逻辑，trap_handler() 完成后立即 restore()，此时 sp 的值不会改变
+                         # 为 syscall 和 timer_interrupt 恢复 context
+                         #
+                         # 这里为 timer_interrupt 的恢复尤为关键
+                         # 下面假设没有 call restore 会发生的情况
+                         # 比如 timer_interrupt 触发后，会 call suspend_current_and_run_next(a,b)
+                         # 如果当前只有一个任务 a，那么 suspend_current_and_run_next(a,a) 后会回到原位置
+                         # 即表现为运行出 trap_handler()，此后的 sp,ra 的值会不受我们控制
+                         # 从而概率性地出现 IllegalInstruction Interrupt，导致 os 异常运行
+                         # 同理，如果是两个不同的 task，要恢复的任务(即形参 b )已被运行过，
+                         # 也会出现运行出 trap_handler() 的问题
+                         #
+                         # 此前在 ch2 的时候，其实也发生过这样的问题
+                         # 本次出现问题的根源在于对 run_next_task() 的控制流认识不清
+                         # 认为 suspend_current_and_run_next() 后控制流不会返回
+                         # 
+                         # 改进
+                         # 需要进一步加强对 sp,ra 等寄存器的理解
+                         # 学习 gdb 调试方法(本次错误的发现有赖于用 gdb 发现 a0 寄存器值超出了 kernel_stack 范围)
+                         # debug!() 大法，应更细化对运行时信息的收集
 
+                         
         ",
         total_size = const { core::mem::size_of::<TrapContext>() },
         off_x1 = const { TrapContext::OFFSET_X1 },
