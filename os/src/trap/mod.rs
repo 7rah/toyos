@@ -77,5 +77,5 @@ pub fn trap_handler(cx: &mut TrapContext) {
             );
         }
     }
-    panic!("trap_handler() leak!")
+    //panic!("trap_handler() leak!")
 }
