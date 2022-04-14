@@ -44,5 +44,5 @@ pub fn shutdown() -> ! {
 }
 
 pub fn set_timer(timer: usize) {
-        sbi_call(SBI_SET_TIMER, timer, 0, 0);
-    }
+    sbi_call(SBI_SET_TIMER, timer, 0, 0);
+}

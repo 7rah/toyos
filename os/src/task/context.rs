@@ -18,16 +18,18 @@ pub struct TaskContext {
     s: [usize; 12],
 }
 
+/*
 pub unsafe fn switch(current_task: *mut TaskContext, next_task: *const TaskContext) {
     // we use compiler to help us save registers which should be saved by caller
     __switch(current_task, next_task)
 }
+*/
 
 seq! {N in 0..=11 {
 #[naked]
 #[no_mangle]
 #[repr(align(4))]
-pub unsafe extern "C" fn __switch(current_task: *mut TaskContext, next_task: *const TaskContext) {
+pub unsafe extern "C" fn switch(current_task: *mut TaskContext, next_task: *const TaskContext) {
     asm!(
         "
             # save current sp, ra, s0~s11

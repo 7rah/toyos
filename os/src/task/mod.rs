@@ -63,15 +63,17 @@ impl TaskManager {
         let app_id = inner.current_task;
         unsafe { core::slice::from_raw_parts(get_base_i(app_id) as *const u8, APP_SIZE_LIMIT) }
     }
-    pub fn run_first_task(&self) {
+    pub fn run_first_task(&self) -> ! {
         let mut inner = self.inner.exclusive_access();
         let task0 = &mut inner.tasks[0];
         task0.task_status = TaskStatus::Running;
         let next_task_cx_ptr = &task0.task_cx as *const TaskContext;
+        debug!("run first task");
         drop(inner);
         let mut _unused = TaskContext::zero_init();
 
         unsafe { switch(&mut _unused, next_task_cx_ptr) }
+        panic!("unreachable in run_first_task!");
     }
     /// Change the status of current `Running` task into `Ready`.
     fn mark_current_suspended(&self) {
@@ -99,16 +101,18 @@ impl TaskManager {
     pub fn run_next_task(&self) {
         let next = self.find_next_task();
         if let Some(next) = next {
-            debug!("next task: {:?} {}", next, APP_NAME[next]);
             let mut inner = self.inner.exclusive_access();
             let current = inner.current_task;
+
+            let current_name = APP_NAME[current];
+            let next_name = APP_NAME[next];
+            debug!("run next task! current:{current} {current_name} next:{next} {next_name}");
 
             inner.current_task = next;
             inner.tasks[next].task_status = TaskStatus::Running;
 
             let current_task_cx_ptr = &mut inner.tasks[current].task_cx as *mut TaskContext;
             let next_task_cx_ptr = &inner.tasks[next].task_cx as *const TaskContext;
-
             drop(inner);
 
             unsafe { switch(current_task_cx_ptr, next_task_cx_ptr) }
