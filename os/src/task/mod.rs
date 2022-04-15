@@ -2,7 +2,7 @@ mod context;
 mod task;
 
 pub use context::TaskContext;
-use log::debug;
+use log::{debug, trace};
 
 use self::{
     context::switch,
@@ -106,7 +106,7 @@ impl TaskManager {
 
             let current_name = APP_NAME[current];
             let next_name = APP_NAME[next];
-            debug!("run next task! current:{current} {current_name} next:{next} {next_name}");
+            trace!("run next task! current:{current} {current_name} next:{next} {next_name}");
 
             inner.current_task = next;
             inner.tasks[next].task_status = TaskStatus::Running;

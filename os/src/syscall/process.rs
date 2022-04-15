@@ -1,5 +1,4 @@
 //! App management syscalls
-use log::debug;
 
 use super::check_buf;
 use crate::{
@@ -15,7 +14,6 @@ pub fn sys_exit(exit_code: i32) -> ! {
 }
 
 pub fn sys_yield() -> isize {
-    debug!("yield to next task");
     suspend_current_and_run_next();
     0
 }

@@ -1,6 +1,5 @@
 use core::arch::asm;
 
-use log::debug;
 use repr_offset::ReprOffset;
 use seq_macro::seq;
 
@@ -58,7 +57,6 @@ pub unsafe extern "C" fn switch(current_task: *mut TaskContext, next_task: *cons
 
 impl TaskContext {
     pub fn goto_restore(kstack_ptr: &TrapContext) -> TaskContext {
-        debug!("kstack_ptr {:?}", kstack_ptr as *const TrapContext);
         TaskContext {
             ra: restore as usize,
             sp: kstack_ptr as *const TrapContext as usize,
