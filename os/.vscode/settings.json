@@ -1,4 +1,5 @@
 {
     "rust-analyzer.checkOnSave.command": "check",
-    "rust-analyzer.checkOnSave.features": ["check-only"]
+    "rust-analyzer.checkOnSave.features": ["check-only"],
+    "rust-analyzer.checkOnSave.allTargets": false
 }
