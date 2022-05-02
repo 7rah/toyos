@@ -4,7 +4,7 @@ mod task;
 use core::time::Duration;
 
 pub use context::TaskContext;
-use log::{debug, info, trace};
+use log::{info, trace};
 pub use task::TaskInfo;
 
 use self::{

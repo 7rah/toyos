@@ -1,8 +1,6 @@
 pub mod context;
 
-use core::time::Duration;
-
-use log::{debug, info, trace};
+use log::{info, trace};
 use riscv::register::{
     mtvec::TrapMode,
     scause::{self, Exception, Interrupt, Trap},
