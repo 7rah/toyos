@@ -9,7 +9,11 @@ struct Stdout;
 impl Write for Stdout {
     fn write_str(&mut self, s: &str) -> fmt::Result {
         for c in s.chars() {
-            console_putchar(c as usize);
+            if c != 'µ' {
+                console_putchar(c as usize);
+            } else {
+                console_putchar('u' as usize);
+            }
         }
         Ok(())
     }
