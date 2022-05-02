@@ -17,33 +17,24 @@ pub struct TaskContext {
     s: [usize; 12],
 }
 
-/*
-pub unsafe fn switch(current_task: *mut TaskContext, next_task: *const TaskContext) {
-    // we use compiler to help us save registers which should be saved by caller
-    __switch(current_task, next_task)
-}
-*/
-
 seq! {N in 0..=11 {
 #[naked]
 #[no_mangle]
 #[repr(align(4))]
 pub unsafe extern "C" fn switch(current_task: *mut TaskContext, next_task: *const TaskContext) {
     asm!(
-        "
-            # save current sp, ra, s0~s11
+        "   # save current sp, ra, s0~s11
             sd sp, {off_sp}(a0)
             sd ra, {off_ra}(a0)",
-            #(
-                concat!("sd s",N,", {off_s",N,"}(a0)"), //equal to sd s0~11, {off_x0~11}(a0)
-            )*
+        #(
+            concat!("sd s",N,", {off_s",N,"}(a0)"), //equal to sd s0~11, {off_x0~11}(a0)
+        )*
 
             // restore next sp, ra, s0~s11
-            #(
-                concat!("ld s",N,", {off_s",N,"}(a1)"), //equal to ld s0~11, {off_x0~11}(a0)
-            )*
-        "
-            ld sp, {off_sp}(a1)
+        #(
+            concat!("ld s",N,", {off_s",N,"}(a1)"), //equal to ld s0~11, {off_x0~11}(a0)
+        )*
+        "   ld sp, {off_sp}(a1)
             ld ra, {off_ra}(a1)
             ret",
     off_sp = const {TaskContext::OFFSET_SP},

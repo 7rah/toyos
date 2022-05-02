@@ -1,6 +1,8 @@
 pub mod context;
 
-use log::{info, trace};
+use core::time::Duration;
+
+use log::{debug, info, trace};
 use riscv::register::{
     mtvec::TrapMode,
     scause::{self, Exception, Interrupt, Trap},
@@ -10,9 +12,9 @@ use riscv::register::{
 use self::context::TrapContext;
 use crate::{
     stack_trace::print_stack_trace,
-    syscall::syscall,
-    task::{exit_current_and_run_next, suspend_current_and_run_next},
-    timer::set_next_trigger,
+    syscall::{syscall, SyscallId},
+    task::{exit_current_and_run_next, suspend_current_and_run_next, TASK_MANAGER},
+    timer::{set_next_trigger, timer_now},
 };
 
 pub fn init() {
@@ -30,8 +32,11 @@ pub fn enable_timer_interrupt() {
 
 #[no_mangle]
 pub fn trap_handler(cx: &mut TrapContext) {
+    let timestamp = TASK_MANAGER.get_timestamp();
+    TASK_MANAGER.add_current_task_info_time(timer_now() - timestamp);
     let scause = scause::read();
     let stval = stval::read();
+    let taskinfo = TASK_MANAGER.get_current_task_info();
 
     trace!(
         "sp: {:#x?} sepc: {:#x?} {:?} {}",
@@ -42,24 +47,32 @@ pub fn trap_handler(cx: &mut TrapContext) {
     );
     trace!("cx ptr {:#x?}", cx as *mut TrapContext);
     trace!("cx val {:#x?}", cx);
+    trace!("{:?}", taskinfo);
 
     match scause.cause() {
         Trap::Exception(Exception::UserEnvCall) => {
             cx.sepc += 4; //move to next command
+
+            let start = timer_now();
             cx.x10 = syscall(cx.x17, [cx.x10, cx.x11, cx.x12]) as usize;
+            let end = timer_now();
+            TASK_MANAGER
+                .add_current_task_info_call_times(SyscallId::from(cx.x17))
+                .expect("Unreachable!");
+            TASK_MANAGER.add_current_task_info_time(end - start);
         }
 
         Trap::Exception(Exception::StoreFault) | Trap::Exception(Exception::StorePageFault) => {
             info!("PageFault in application, kernel killed it.");
-            info!("sepc = {:#x}", cx.sepc);
-            exit_current_and_run_next();
+            info!("sepc = {:#x}, {:?}", cx.sepc, taskinfo);
             unsafe { print_stack_trace(cx.x8 as *const usize) }
+            exit_current_and_run_next();
         }
         Trap::Exception(Exception::IllegalInstruction) => {
             info!("IllegalInstruction in application, kernel killed it.");
-            info!("sepc = {:#x}", cx.sepc);
-            exit_current_and_run_next();
+            info!("sepc = {:#x}, {:?}", cx.sepc, taskinfo);
             unsafe { print_stack_trace(cx.x8 as *const usize) }
+            exit_current_and_run_next();
         }
 
         Trap::Interrupt(Interrupt::SupervisorTimer) => {
@@ -75,5 +88,7 @@ pub fn trap_handler(cx: &mut TrapContext) {
             );
         }
     }
+
+    TASK_MANAGER.set_timestamp(timer_now());
     //panic!("trap_handler() leak!")
 }

@@ -1,8 +1,11 @@
 mod context;
 mod task;
 
+use core::time::Duration;
+
 pub use context::TaskContext;
-use log::{debug, trace};
+use log::{debug, info, trace};
+pub use task::TaskInfo;
 
 use self::{
     context::switch,
@@ -13,6 +16,8 @@ use crate::{
     link_app::{APP_NAME, APP_NUM},
     loader::{init_app_cx, UserStack, USER_STACK},
     sync::UPSafeCell,
+    syscall::SyscallId,
+    timer::timer_now,
 };
 
 pub struct TaskManager {
@@ -20,8 +25,10 @@ pub struct TaskManager {
 }
 
 pub struct TaskManagerInner {
+    infos: [TaskInfo; APP_NUM],
     tasks: [TaskControlBlock; APP_NUM],
     current_task: usize,
+    timestamp: Duration,
 }
 
 lazy_static::lazy_static! {
@@ -32,13 +39,21 @@ impl TaskManager {
     fn init() -> Self {
         let mut tasks = [TaskControlBlock::zero_init(); APP_NUM];
 
-        for (app_id, task) in tasks.iter_mut().enumerate() {
+        let mut infos = [(); APP_NUM].map(|_| TaskInfo::zero_init());
+
+        for (app_id, (task, info)) in tasks.iter_mut().zip(infos.iter_mut()).enumerate() {
             task.task_cx = TaskContext::goto_restore(init_app_cx(app_id));
             task.task_status = TaskStatus::Ready;
+
+            info.status = TaskStatus::Ready;
+            info.name = APP_NAME[app_id];
+            info.id = app_id;
         }
 
         let inner = TaskManagerInner {
             tasks,
+            infos,
+            timestamp: Duration::default(),
             current_task: 0,
         };
         TaskManager {
@@ -52,6 +67,10 @@ impl TaskManager {
     pub fn get_current_task_name(&self) -> &'static str {
         let inner = self.inner.exclusive_access();
         APP_NAME[inner.current_task]
+    }
+    pub fn get_current_task_status(&self) -> TaskStatus {
+        let inner = self.inner.exclusive_access();
+        inner.tasks[inner.current_task].task_status
     }
     pub fn get_current_task_stack(&self) -> &UserStack {
         let inner = self.inner.exclusive_access();
@@ -68,9 +87,9 @@ impl TaskManager {
         let task0 = &mut inner.tasks[0];
         task0.task_status = TaskStatus::Running;
         let next_task_cx_ptr = &task0.task_cx as *const TaskContext;
-        debug!("run first task");
-        drop(inner);
         let mut _unused = TaskContext::zero_init();
+        drop(inner);
+        TASK_MANAGER.set_timestamp(timer_now());
 
         unsafe { switch(&mut _unused, next_task_cx_ptr) }
         panic!("unreachable in run_first_task!");
@@ -80,6 +99,7 @@ impl TaskManager {
         let mut inner = self.inner.exclusive_access();
         let current = inner.current_task;
         inner.tasks[current].task_status = TaskStatus::Ready;
+        inner.infos[current].status = TaskStatus::Ready;
     }
 
     /// Change the status of current `Running` task into `Exited`.
@@ -87,6 +107,7 @@ impl TaskManager {
         let mut inner = self.inner.exclusive_access();
         let current = inner.current_task;
         inner.tasks[current].task_status = TaskStatus::Exited;
+        inner.infos[current].status = TaskStatus::Exited;
     }
 
     pub fn find_next_task(&self) -> Option<usize> {
@@ -117,8 +138,34 @@ impl TaskManager {
 
             unsafe { switch(current_task_cx_ptr, next_task_cx_ptr) }
         } else {
+            info!("{:#?}", self.inner.exclusive_access().infos);
             panic!("All applications completed!")
         }
+    }
+
+    pub fn get_current_task_info(&self) -> TaskInfo {
+        let inner = self.inner.exclusive_access();
+        inner.infos[inner.current_task]
+    }
+
+    pub fn add_current_task_info_call_times(&self, syscall_id: SyscallId) -> Option<()> {
+        let mut inner = self.inner.exclusive_access();
+        let current = inner.current_task;
+        let call = &mut inner.infos[current].call;
+        call.add(syscall_id)
+    }
+
+    pub fn add_current_task_info_time(&self, time: Duration) {
+        let mut inner = self.inner.exclusive_access();
+        let current = inner.current_task;
+        inner.infos[current].add_time(time);
+    }
+
+    pub fn get_timestamp(&self) -> Duration {
+        self.inner.exclusive_access().timestamp
+    }
+    pub fn set_timestamp(&self, timestamp: Duration) {
+        self.inner.exclusive_access().timestamp = timestamp
     }
 }
 

@@ -10,11 +10,7 @@
 //! `sys_` then the name of the syscall. You can find functions like this in
 //! submodules, and you should also implement syscalls this way.
 
-const SYSCALL_WRITE: usize = 64;
-const SYSCALL_EXIT: usize = 93;
-const SYSCALL_YIELD: usize = 124;
-const SYSCALL_GET_TIME: usize = 169;
-const SYSCALL_GET_TASKINFO: usize = 233;
+pub const MAX_SYSCALL_NUM: usize = 8;
 
 mod fs;
 mod process;
@@ -27,15 +23,41 @@ use process::*;
 
 use crate::task::TASK_MANAGER;
 
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum SyscallId {
+    Write = 64,
+    Exit = 93,
+    Yield = 124,
+    GetTime = 169,
+    GetTaskInfo = 233,
+    Unsupported,
+}
+
+use SyscallId::*;
+
+impl From<usize> for SyscallId {
+    fn from(v: usize) -> Self {
+        match v {
+            x if x == Write as usize => Write,
+            x if x == Exit as usize => Exit,
+            x if x == Yield as usize => Yield,
+            x if x == GetTime as usize => GetTime,
+            x if x == GetTaskInfo as usize => GetTaskInfo,
+            _ => Unsupported,
+        }
+    }
+}
+
 /// handle syscall exception with `syscall_id` and other arguments
-pub fn syscall(syscall_id: usize, args: [usize; 3]) -> isize {
+pub fn syscall(syscall_id_raw: usize, args: [usize; 3]) -> isize {
+    let syscall_id = SyscallId::from(syscall_id_raw);
     match syscall_id {
-        SYSCALL_WRITE => sys_write(args[0], args[1] as *const u8, args[2]),
-        SYSCALL_EXIT => sys_exit(args[0] as i32),
-        SYSCALL_YIELD => sys_yield(),
-        SYSCALL_GET_TIME => sys_get_time(),
-        SYSCALL_GET_TASKINFO => sys_get_taskinfo(args[0] as *mut u8, args[1]),
-        _ => panic!("Unsupported syscall_id: {}", syscall_id),
+        Write => sys_write(args[0], args[1] as *const u8, args[2]),
+        Exit => sys_exit(args[0] as i32),
+        Yield => sys_yield(),
+        GetTime => sys_get_time(),
+        GetTaskInfo => sys_get_taskinfo(args[0] as *mut u8, args[1]),
+        Unsupported => panic!("Unsupported syscall_id: {}", syscall_id_raw),
     }
 }
 

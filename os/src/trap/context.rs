@@ -141,18 +141,6 @@ pub unsafe extern "C" fn restore(cx: &TrapContext) {
 }
 });
 
-#[naked]
-#[no_mangle]
-#[repr(align(4))]
-pub unsafe extern "C" fn restore_(cx: &TrapContext) {
-    asm!(
-        "mv sp, a0
-          call restore  
-        ",
-        options(noreturn)
-    );
-}
-
 impl TrapContext {
     pub fn init_app_context(entry: usize, sp: usize) -> Self {
         let mut sstatus = sstatus::read();
