@@ -155,10 +155,16 @@ impl TaskManager {
         call.add(syscall_id)
     }
 
-    pub fn add_current_task_info_time(&self, time: Duration) {
+    pub fn add_current_task_user_time(&self, time: Duration) {
         let mut inner = self.inner.exclusive_access();
         let current = inner.current_task;
-        inner.infos[current].add_time(time);
+        inner.infos[current].add_user_time(time);
+    }
+
+    pub fn add_current_task_kernel_time(&self, time: Duration) {
+        let mut inner = self.inner.exclusive_access();
+        let current = inner.current_task;
+        inner.infos[current].add_kernel_time(time);
     }
 
     pub fn get_timestamp(&self) -> Duration {

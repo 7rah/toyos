@@ -32,7 +32,8 @@ pub struct TaskInfo {
     pub status: TaskStatus,
     pub name: &'static str,
     pub call: Call,
-    pub time: Duration,
+    pub user_time: Duration,
+    pub kernel_time: Duration,
 }
 
 #[derive(Clone, Copy)]
@@ -90,11 +91,15 @@ impl TaskInfo {
             status: TaskStatus::Uninit,
             name: "",
             call: Call::zero_init(),
-            time: Duration::default(),
+            user_time: Duration::default(),
+            kernel_time: Duration::default(),
         }
     }
 
-    pub fn add_time(&mut self, time: Duration) {
-        self.time += time;
+    pub fn add_user_time(&mut self, time: Duration) {
+        self.user_time += time;
+    }
+    pub fn add_kernel_time(&mut self, time: Duration) {
+        self.kernel_time += time;
     }
 }

@@ -31,13 +31,13 @@ pub fn enable_timer_interrupt() {
 #[no_mangle]
 pub fn trap_handler(cx: &mut TrapContext) {
     let timestamp = TASK_MANAGER.get_timestamp();
-    TASK_MANAGER.add_current_task_info_time(timer_now() - timestamp);
+    TASK_MANAGER.add_current_task_user_time(timer_now() - timestamp);
     let scause = scause::read();
     let stval = stval::read();
     let taskinfo = TASK_MANAGER.get_current_task_info();
 
     trace!(
-        "sp: {:#x?} sepc: {:#x?} {:?} {}",
+        "sp: {:#x?} sepc: {:#x?} {:?} sie: {}",
         cx.x2,
         cx.sepc,
         scause.cause(),
@@ -57,7 +57,7 @@ pub fn trap_handler(cx: &mut TrapContext) {
             TASK_MANAGER
                 .add_current_task_info_call_times(SyscallId::from(cx.x17))
                 .expect("Unreachable!");
-            TASK_MANAGER.add_current_task_info_time(end - start);
+            TASK_MANAGER.add_current_task_kernel_time(end - start);
         }
 
         Trap::Exception(Exception::StoreFault) | Trap::Exception(Exception::StorePageFault) => {
